@@ -4,6 +4,8 @@ import { Request, Response, Router } from "express";
 class UserController {
   public router: Router;
 
+  public path: string = "/users";
+
   // 생성자
   constructor() {
     this.router = Router();

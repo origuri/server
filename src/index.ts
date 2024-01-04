@@ -1,8 +1,8 @@
-import express, { NextFunction, Request, Response, Router } from "express";
+import express, { Request, Response } from "express";
 import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
-import UserController from "./routes/users";
+import Controllers from "./controllers";
 
 const PORT = 4000;
 
@@ -19,7 +19,10 @@ app.use(express.json()); // json으로 데이터 받기
 app.use(express.urlencoded({ extended: true, limit: "700mb" })); // url 쿼리
 
 // user 라우터 등록
-app.use("/users", UserController.router);
+//app.use("/users", UserController.router);
+Controllers.forEach((controller) => {
+  app.use(controller.path, controller.router);
+});
 
 // controller
 const handleHome = (req: Request, res: Response) => {
