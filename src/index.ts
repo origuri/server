@@ -1,8 +1,13 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
 import Controllers from "./controllers";
+
+interface IError {
+  status?: number;
+  message?: string;
+}
 
 const PORT = 4000;
 
@@ -29,6 +34,13 @@ const handleHome = (req: Request, res: Response) => {
   console.log("홈페이지에 들어가려고 해요!");
   return res.send("hi");
 };
+
+// 에러 핸들링
+app.use((err: IError, req: Request, res: Response, next: NextFunction) => {
+  console.log(err);
+
+  res.status(err.status || 500).json({ message: err.message || "서버 에러" });
+});
 
 // get 메소드
 app.get("/", handleHome);

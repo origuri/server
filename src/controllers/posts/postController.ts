@@ -31,12 +31,14 @@ class Postcontroller {
   private getPosts = (req: Request, res: Response) => {
     res.status(200).json({ posts: this.posts });
   };
+
   private deletePost = (req: Request, res: Response) => {
     const { id } = req.params;
     const newPosts = this.posts.filter((post) => post.id !== Number(id));
-
+    this.posts = newPosts;
     res.status(204).json({});
   };
+
   private patchPost = (req: Request, res: Response) => {
     const { id } = req.params;
     const { title, contents } = req.body;
