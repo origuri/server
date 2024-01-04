@@ -2,9 +2,14 @@ import express, { NextFunction, Request, Response } from "express";
 import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
-import dayjs from "dayjs";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+
+let users = [
+  {
+    id: 1,
+    name: "오리",
+    age: 29,
+  },
+];
 
 const PORT = 4000;
 
@@ -13,48 +18,81 @@ const app = express();
 // log 패키지
 const logger = morgan("dev");
 
-/* response 하는 법
-express는 request 객체와 response 객체를 보낸다 
-타입은 express 패키지의 Request와 Response
-request를 받으면 반드시 response를 return 해야한다. 
-*/
+// global middleware
+app.use(logger); // log
+app.use(cors()); // 도메인 제한
+app.use(helmet()); // 보안
+app.use(express.json()); // json으로 데이터 받기
+app.use(express.urlencoded({ extended: true, limit: "700mb" })); // url 쿼리
+
+// controller
 const handleHome = (req: Request, res: Response) => {
   console.log("홈페이지에 들어가려고 해요!");
   return res.send("hi");
 };
 
-const handleLogin = (req: Request, res: Response) => {
-  return res.send("여기서 로그인");
+const getUsers = (req: Request, res: Response) => {
+  res.status(200).json({ users }); // 가져오는 거니까 res
 };
 
-const handleProtected = (req: Request, res: Response, next: NextFunction) => {
-  return res.send("프라이빗 라운지");
+// post는 body로 데이터를 받음
+const postUsers = (req: Request, res: Response) => {
+  const { name, age } = req.body; // 내가 요청해야 되는거니까 req
+  console.log("body -> ", req.body);
+
+  users.push({
+    id: Date.now(),
+    name,
+    age,
+  });
+  res.status(201).json({ users });
 };
 
-const today = new Date();
-const todayToDayjs = dayjs(today).format("YYYY-MM-DD");
-// { todayToDayjs: '2024-01-04' }
-console.log({ todayToDayjs });
+const patchUsers = (req: Request, res: Response) => {
+  const { id } = req.params; // url의 params
+  const { name, age } = req.body; // 수정된 정보
+  console.log("req.params -> ", req.params);
+  const targetUserIdx = users.findIndex((user) => user.id === Number(id));
 
-const password = "1234";
-// password는 string 타입이여야 함, 뒤에는 salt 몇 번 돌릴지
-const hashedPassword = bcrypt.hashSync(password, 10);
-console.log({ hashedPassword });
+  users[targetUserIdx] = {
+    id: users[targetUserIdx].id,
+    name: name ? name : users[targetUserIdx].name,
+    age: age ? age : users[targetUserIdx].age,
+  };
 
-const token = jwt.sign("1234", "abcd");
-console.log({ token });
+  // 수정에 성공했을 경우 json을 비워줘야 함.
+  res.status(204).json({});
+};
 
-// global middleware
-app.use(logger);
-// 도메인 차단
-app.use(cors());
-// 보안 강화
-app.use(helmet());
+const deleteUser = (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const deletedUsers = users.filter((user) => user.id !== Number(id));
+  users = deletedUsers;
+
+  // 삭제에 성공했을 경우 json을 비워줘야 함.
+  res.status(204).json({});
+};
 
 // get 메소드
 app.get("/", handleHome);
-app.get("/login", handleLogin);
-app.get("/protected", handleProtected);
+
+// 유저 정보 가져오기
+// 성공 status 200
+app.get("/users", getUsers);
+
+// post 메소드
+// 유저 생성 성공 status 201
+app.post("/users", postUsers);
+
+// patch 메소드
+// 유저 수정 성공 status 204
+// req.params.id
+app.patch("/users/:id", patchUsers);
+
+// delete 메소드
+// 유저 삭제 성공 status 204
+app.delete("/users/:id", deleteUser);
 
 const isStart = () => {
   console.log(`서버가 시작되었습니다.🌍🌍 http://localhost:${PORT}/`);
