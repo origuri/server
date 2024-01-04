@@ -1,22 +1,17 @@
 import express, { NextFunction, Request, Response } from "express";
+import morgan from "morgan";
+import cors from "cors";
+import helmet from "helmet";
+import dayjs from "dayjs";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const PORT = 4000;
 
 // 서버를 만든 것.
 const app = express();
-
-const logger = (req: Request, res: Response, next: NextFunction) => {
-  console.log(`난 미들 웨어임 ${req.method}로 ${req.url}로 가려고 해`);
-  next(); // handleHome을 호출
-};
-
-const privateMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const url = req.url;
-  if (url == "/protected") {
-    return res.send("여기오면 안돼");
-  }
-  next();
-};
+// log 패키지
+const logger = morgan("dev");
 
 /* response 하는 법
 express는 request 객체와 response 객체를 보낸다 
@@ -35,9 +30,27 @@ const handleLogin = (req: Request, res: Response) => {
 const handleProtected = (req: Request, res: Response, next: NextFunction) => {
   return res.send("프라이빗 라운지");
 };
+
+const today = new Date();
+const todayToDayjs = dayjs(today).format("YYYY-MM-DD");
+// { todayToDayjs: '2024-01-04' }
+console.log({ todayToDayjs });
+
+const password = "1234";
+// password는 string 타입이여야 함, 뒤에는 salt 몇 번 돌릴지
+const hashedPassword = bcrypt.hashSync(password, 10);
+console.log({ hashedPassword });
+
+const token = jwt.sign("1234", "abcd");
+console.log({ token });
+
 // global middleware
 app.use(logger);
-app.use(privateMiddleware);
+// 도메인 차단
+app.use(cors());
+// 보안 강화
+app.use(helmet());
+
 // get 메소드
 app.get("/", handleHome);
 app.get("/login", handleLogin);
