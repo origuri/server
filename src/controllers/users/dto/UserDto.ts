@@ -19,6 +19,7 @@ export class UserDto {
   }
 
   // user의 fullname을 가져오는 함수
+
   public getFullName = () => {
     return `${this.firstName} ${this.lastName}`;
   };

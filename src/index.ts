@@ -3,6 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
 import Controllers from "./controllers";
+import { connection } from "./dbConnection";
 
 interface IError {
   status?: number;

@@ -1,6 +1,11 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { IUser, UserDto } from "./dto";
+import { CreateUserDto, IUser, UserDto } from "./dto";
+import { connection, format, getCreateMapper } from "../../dbConnection";
+import MybatisMapper from "mybatis-mapper";
+import { Field, ResultSetHeader } from "mysql2";
 
+// dbConnection.ts에서 메퍼와 db 커넥션을 연결시켜주는 함수
+getCreateMapper();
 // router
 class UserController {
   public router: Router;
@@ -27,16 +32,32 @@ class UserController {
     //this.router.get("/", this.getUsers.bind(this));
     this.router.get("/", this.getUsers);
     this.router.get("/detail/:id", this.getUser);
-    this.router.get("/detail/name/:id", this.getUserFullName);
+    this.router.get("/detail/:id/fullname", this.getUserFullName);
     this.router.post("/", this.createUser);
   }
 
   // 타입 스크립트를 사용하면 화살표 함수로 bind를 안해도 된다.
   private getUsers = (req: Request, res: Response, next: NextFunction) => {
     try {
-      const users = this.users.map((user) => new UserDto(user));
+      // mapper namespace, mapper id, params, format, => format은 dbConnection.ts에서 export 한 것
+      let query = MybatisMapper.getStatement("UserMapper", "getUsers", format);
+      console.log("마이바티스 쿼리 -> ", query);
 
-      res.status(200).json({ users });
+      //connection.connect();
+      connection.query(
+        query,
+        (err: any, result: ResultSetHeader, fields: Field) => {
+          if (err) {
+            console.log("에러 발생-> ", err);
+          }
+          console.log("결과 -> ", result);
+          res.status(200).json({ result });
+        }
+      );
+      //connection.end();
+      //const users = this.users.map((user) => new UserDto(user));
+
+      //res.status(200).json({ users });
     } catch (err) {
       next(err);
     }
@@ -85,12 +106,9 @@ class UserController {
   private createUser = (req: Request, res: Response, next: NextFunction) => {
     try {
       const { firstName, lastName, age } = req.body;
-      this.users.push({
-        id: Date.now(),
-        firstName,
-        lastName,
-        age,
-      });
+      const newUser = new CreateUserDto(firstName, lastName, age).getNewUser();
+
+      this.users.push(newUser);
 
       res.status(201).json({ users: this.users });
     } catch (err) {

@@ -1,4 +1,9 @@
 import { Request, Response, Router } from "express";
+import { connection, format, getCreateMapper } from "../../dbConnection";
+import MybatisMapper from "mybatis-mapper";
+import { Field, ResultSetHeader } from "mysql2";
+
+getCreateMapper();
 
 class Postcontroller {
   private posts = [
@@ -29,7 +34,23 @@ class Postcontroller {
   }
 
   private getPosts = (req: Request, res: Response) => {
-    res.status(200).json({ posts: this.posts });
+    //MybatisMapper.createMapper(["./src/mybatis-mapper/PostMapper.xml"]);
+    let query = MybatisMapper.getStatement("PostMapper", "getPosts", format);
+    console.log("마이바티스 쿼리 -> ", query);
+
+    //connection.connect();
+    connection.query(
+      query,
+      (err: any, result: ResultSetHeader, fields: Field) => {
+        if (err) {
+          console.log("에러 발생-> ", err);
+        }
+        console.log("결과 -> ", result);
+        res.status(200).json({ result });
+      }
+    );
+    //connection.end();
+    //res.status(200).json({ posts: this.posts });
   };
 
   private deletePost = (req: Request, res: Response) => {
