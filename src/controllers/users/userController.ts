@@ -1,11 +1,9 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { CreateUserDto, IUser, UserDto } from "./dto";
-import { connection, format, getCreateMapper } from "../../dbConnection";
-import MybatisMapper from "mybatis-mapper";
-import { Field, ResultSetHeader } from "mysql2";
 
-// dbConnection.ts에서 메퍼와 db 커넥션을 연결시켜주는 함수
-getCreateMapper();
+import { Pool } from "mysql2/promise";
+import { getConnection } from "../../dbPromiseConnection";
+
 // router
 class UserController {
   public router: Router;
@@ -36,7 +34,7 @@ class UserController {
     this.router.post("/", this.createUser);
   }
 
-  // 타입 스크립트를 사용하면 화살표 함수로 bind를 안해도 된다.
+  /* // 타입 스크립트를 사용하면 화살표 함수로 bind를 안해도 된다.
   private getUsers = (req: Request, res: Response, next: NextFunction) => {
     try {
       // mapper namespace, mapper id, params, format, => format은 dbConnection.ts에서 export 한 것
@@ -55,11 +53,29 @@ class UserController {
         }
       );
       //connection.end();
-      //const users = this.users.map((user) => new UserDto(user));
+      //  const users = this.users.map((user) => new UserDto(user));
 
       //res.status(200).json({ users });
     } catch (err) {
       next(err);
+    }
+  }; */
+  // 타입 스크립트를 사용하면 화살표 함수로 bind를 안해도 된다.
+  private getUsers = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const db: Pool = await getConnection();
+    try {
+      const users = await db.query("select * from user");
+
+      // buffer값도 같이 나오기 때문에 첫번째 배열만 받으면 됨.
+      res.status(200).json({ users: users[0] });
+    } catch (err) {
+      next(err);
+    } finally {
+      await db.end();
     }
   };
 

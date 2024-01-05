@@ -1,9 +1,7 @@
-import { Request, Response, Router } from "express";
-import { connection, format, getCreateMapper } from "../../dbConnection";
-import MybatisMapper from "mybatis-mapper";
-import { Field, ResultSetHeader } from "mysql2";
+import { NextFunction, Request, Response, Router } from "express";
 
-getCreateMapper();
+import { Pool } from "mysql2/promise";
+import { getConnection } from "../../dbPromiseConnection";
 
 class Postcontroller {
   private posts = [
@@ -33,7 +31,28 @@ class Postcontroller {
     this.router.patch("/:id", this.patchPost);
   }
 
-  private getPosts = (req: Request, res: Response) => {
+  private getPosts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const db: Pool = await getConnection();
+    console.log("end 전 db-> ", db);
+
+    try {
+      const posts = await db.query("select * from post");
+
+      res.status(200).json({ posts: posts[0] });
+    } catch (error) {
+      next(error);
+    } finally {
+      db.end();
+      console.log("end 후 db-> ", db);
+      // pool이 부셔졌다고 나옴
+      //const posts = await db.query("select * from post");
+    }
+  };
+  /* private getPosts = (req: Request, res: Response) => {
     //MybatisMapper.createMapper(["./src/mybatis-mapper/PostMapper.xml"]);
     let query = MybatisMapper.getStatement("PostMapper", "getPosts", format);
     console.log("마이바티스 쿼리 -> ", query);
@@ -52,7 +71,7 @@ class Postcontroller {
     //connection.end();
     //res.status(200).json({ posts: this.posts });
   };
-
+ */
   private deletePost = (req: Request, res: Response) => {
     const { id } = req.params;
     const newPosts = this.posts.filter((post) => post.id !== Number(id));
