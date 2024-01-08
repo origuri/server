@@ -1,4 +1,6 @@
-import UserController from "./users/userController";
-import PostController from "./posts/postController";
+import { userController } from "../users";
+import { AuthController } from "../auth";
 
-export default [UserController, PostController];
+const Controllers = [userController, AuthController];
+
+export default Controllers;
