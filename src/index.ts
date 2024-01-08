@@ -4,8 +4,8 @@ import cors from "cors";
 import helmet from "helmet";
 
 import dotenv from "dotenv";
-import bcrypt from "bcrypt";
-import Controllers from "./controllers";
+
+import { Controllers } from "./models/index";
 interface IError {
   status?: number;
   message?: string;

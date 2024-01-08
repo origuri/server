@@ -1,5 +1,5 @@
 import { IRegisterUser } from "../../auth/dto";
-import { getConnection } from "../../dbPromiseConnection";
+import { getConnection } from "../../../dbPromiseConnection";
 import {
   FieldPacket,
   Pool,
@@ -7,7 +7,6 @@ import {
   ResultSetHeader,
   RowDataPacket,
 } from "mysql2/promise";
-import { IUser } from "../dto";
 
 export class UserService {
   // 5가지 서비스를 만들 것.
