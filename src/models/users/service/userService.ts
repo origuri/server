@@ -1,19 +1,35 @@
 import { IRegisterUser } from "../../auth/dto";
 import { getConnection } from "../../../dbPromiseConnection";
-import {
-  FieldPacket,
-  Pool,
-  ProcedureCallPacket,
-  ResultSetHeader,
-  RowDataPacket,
-} from "mysql2/promise";
+import { Pool, ResultSetHeader, RowDataPacket } from "mysql2/promise";
+import { UserDto } from "../dto";
 
 export class UserService {
   // 5가지 서비스를 만들 것.
   // findById, findMany, create, update, delete
 
+  // findById
+  public findById = async (id: number) => {
+    const db: Pool = await getConnection();
+
+    try {
+      const user = await db.query<RowDataPacket[]>(
+        "select * from user where id = ?",
+        [id]
+      );
+
+      if (!user[0].length)
+        throw { status: 404, message: "유저가 없습니다. findById" };
+
+      return user[0][0];
+    } catch (error) {
+      console.error(error);
+    } finally {
+      db.end();
+    }
+  };
+
   // email 중복 체크
-  public findUserByEmail = async (email: string) => {
+  public checkUserByEmail = async (email: string) => {
     const db: Pool = await getConnection();
     try {
       // select는 rowDataPacket인듯?
@@ -23,10 +39,10 @@ export class UserService {
       );
       // 뭐든지 배열 첫번째 값을 가져와서 봐야됨.
       console.log("user.length", user[0].length);
-      console.log({ user: user[0] });
+      console.log({ user: user[0][0].password });
 
       if (user[0].length > 0) {
-        return true;
+        return user[0][0]; // jwt발급을 위해 객체를 리턴
       } else {
         return false;
       }
@@ -54,6 +70,7 @@ export class UserService {
 
   public findUsers = async () => {
     const db: Pool = await getConnection();
+
     try {
       const users = await db.query("select * from user");
 

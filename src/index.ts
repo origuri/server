@@ -6,6 +6,7 @@ import helmet from "helmet";
 import dotenv from "dotenv";
 
 import { Controllers } from "./models/index";
+import { jwtAuth } from "./middleware";
 interface IError {
   status?: number;
   message?: string;
@@ -14,7 +15,7 @@ interface IError {
 dotenv.config();
 
 const PORT = Number(process.env.PORT);
-const password = "1234";
+
 (async () => {
   // 서버를 만든 것.
   const app = express();
@@ -27,6 +28,7 @@ const password = "1234";
   app.use(helmet()); // 보안
   app.use(express.json()); // json으로 데이터 받기
   app.use(express.urlencoded({ extended: true, limit: "700mb" })); // url 쿼리
+  app.use(jwtAuth);
 
   // user 라우터 등록
   //app.use("/users", UserController.router);

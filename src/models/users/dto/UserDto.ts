@@ -23,4 +23,8 @@ export class UserDto {
     this.age = props.age;
     this.password = props.password;
   }
+
+  public getPassword = () => {
+    return this.password;
+  };
 }
