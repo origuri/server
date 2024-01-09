@@ -73,15 +73,14 @@ class UserController {
     next: NextFunction
   ) => {
     try {
-      const { name, age, password, email, phoneNumber } = req.body;
+      const { name, password, email, description } = req.body;
       console.log({ name });
 
       const newUser = await this.authService.register({
         name,
-        age,
         password,
         email,
-        phoneNumber,
+        description,
       });
     } catch (err) {
       next(err);

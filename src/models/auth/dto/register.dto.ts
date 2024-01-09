@@ -2,11 +2,10 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 
 export interface IRegisterUser {
-  readonly name: string;
-  readonly email: string;
-  readonly phoneNumber: string;
-  readonly age: number;
-  readonly password: string;
+  name: string;
+  email: string;
+  password: string;
+  description: string;
 }
 
 dotenv.config();
@@ -14,16 +13,14 @@ dotenv.config();
 export class RegisterDto {
   private name: string;
   private email: string;
-  private phoneNumber: string;
-  private age: number;
   private password: string;
+  private description: string;
 
   constructor(props: IRegisterUser) {
     this.name = props.name;
     this.email = props.email;
-    this.phoneNumber = props.phoneNumber;
-    this.age = props.age;
     this.password = props.password;
+    this.description = props.description;
   }
 
   // 비밀번호 암호화하는 함수

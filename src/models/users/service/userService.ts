@@ -86,13 +86,13 @@ export class UserService {
   };
   public createUser = async (props: IRegisterUser) => {
     const db: Pool = await getConnection();
-    const { name, age, password, email, phoneNumber } = props;
+    const { name, password, email, description } = props;
     console.log({ password });
 
     try {
       const newUser = await db.query<ResultSetHeader>(
-        "insert into user(name, age, password, email, phoneNumber) values (?,?,?,?,?)",
-        [name, age, password, email, phoneNumber]
+        "insert into user(name, description, password, email) values (?,?,?,?)",
+        [name, password, email, description]
       );
 
       // newUser가 확실히 존재해야 insertId를 사용할 수 있음.
