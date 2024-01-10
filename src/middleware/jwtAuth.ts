@@ -6,7 +6,7 @@ import { UserService } from "../models/users/service/userService";
 dotenv.config();
 
 export interface IJWT {
-  id: number;
+  id: string;
   iat: number;
   exp: number;
 }

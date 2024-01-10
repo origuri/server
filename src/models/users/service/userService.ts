@@ -9,7 +9,7 @@ export class UserService {
   // findById, findMany, create, update, delete
 
   // findById
-  public findById = async (id: number) => {
+  public findById = async (id: string) => {
     const db: Pool = await getConnection();
 
     try {
@@ -93,8 +93,9 @@ export class UserService {
     try {
       const newUser = await db.query<ResultSetHeader>(
         "insert into user(name, description, password, email) values (?,?,?,?)",
-        [name, password, email, description]
+        [name, description, password, email]
       );
+      console.log({ newUser });
 
       // newUser가 확실히 존재해야 insertId를 사용할 수 있음.
       // 첫번째 배열에 ResultSetHeader 객체가 들어있으므로 그것을 사용하기 위해 첫번째 배열 사용
@@ -132,6 +133,8 @@ export class UserService {
           id,
         ]
       );
+      console.log({ updateResult });
+
       // 업데이트 성공한 row의 수를 넘김.
       return updateResult[0].affectedRows;
     } catch (error) {
