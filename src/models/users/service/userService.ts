@@ -1,7 +1,8 @@
 import { IRegisterUser } from "../../auth/dto";
 import { getConnection } from "../../../dbPromiseConnection";
 import { Pool, ResultSetHeader, RowDataPacket } from "mysql2/promise";
-import { UserDto } from "../dto";
+
+import { UpdateUserDto } from "../dto/UpdateUserDto";
 
 export class UserService {
   // 5가지 서비스를 만들 것.
@@ -109,6 +110,35 @@ export class UserService {
     }
   };
 
-  public updateUser = async () => {};
+  public updateUser = async (id: string, props: UpdateUserDto) => {
+    const db: Pool = await getConnection();
+
+    try {
+      const isExist = await db.query("select * from User where id = ?", [id]);
+      if (!isExist) throw { status: 404, message: "유저가 없어요 " };
+
+      if (props.getUserPassword() !== null && props.getUserPassword() !== "") {
+        await props.updatePassword();
+      }
+      console.log("이것두-> ", props.getUserPassword());
+
+      const updateResult = await db.query<ResultSetHeader>(
+        "update User set email = ?, name = ?, description = ?, password = ? where id = ? ",
+        [
+          props.getUserEmail(),
+          props.getUserName(),
+          props.getUserDescription(),
+          props.getUserPassword(),
+          id,
+        ]
+      );
+      // 업데이트 성공한 row의 수를 넘김.
+      return updateResult[0].affectedRows;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      db.end();
+    }
+  };
   public deleteUser = async () => {};
 }

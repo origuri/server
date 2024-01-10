@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { UserService } from "../service/userService";
 import { AuthService } from "../../auth/service/AuthService";
+import { UpdateUserDto } from "../dto/UpdateUserDto";
+import { UserDto } from "../dto";
 
 // router
 class UserController {
@@ -26,6 +28,7 @@ class UserController {
     this.router.get("/detail/:id", this.getUser);
     this.router.get("/detail/:id/fullname", this.getUserFullName);
     this.router.post("/", this.createUser);
+    this.router.post("/update/:id", this.updateUser);
   }
 
   // 타입 스크립트를 사용하면 화살표 함수로 bind를 안해도 된다.
@@ -82,6 +85,30 @@ class UserController {
         email,
         description,
       });
+      res.status(200).json({ newUser });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  private updateUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { name, password, email, description } = req.body;
+      const { id } = req.params;
+
+      console.log("update -> ", { id, name, password, email, description });
+
+      const updateUserRow = await this.userService.updateUser(
+        id,
+        new UpdateUserDto({ name, password, email, description })
+      );
+      console.log({ updateUserRow });
+
+      return res.status(204).json({ updateUserRow });
     } catch (err) {
       next(err);
     }
