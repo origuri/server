@@ -71,6 +71,7 @@ export class UserService {
 
   public findUsers = async () => {
     const db: Pool = await getConnection();
+    const search = "제목";
 
     try {
       const users = await db.query("select * from user");

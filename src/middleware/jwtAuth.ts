@@ -39,11 +39,6 @@ export const jwtAuth = async (
         if (bearers.length === 2 && typeof bearers[1] === "string") {
           const accessToken = bearers[1];
 
-          if (!process.env.JWT_KEY) {
-            next({ status: 400, message: "process.env.JWT_KEY가 잘못됨." });
-            return;
-          }
-
           // 받은 jwt를 복호화, 만들 때 user의 id를 사용했기 때문에 그걸로 유저를 인증한다.
           const decodedToken = jwt.verify(accessToken, process.env.JWT_KEY);
           if (!decodedToken) return;

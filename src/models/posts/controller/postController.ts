@@ -3,6 +3,7 @@ import { PostService } from "../service/postService";
 import { CommentService } from "../../comments/service";
 import { CreateChildCommentDto, CreatePostDto } from "../dto";
 import CreateCommentDto from "../../comments/dto/create-comment.dto";
+import { RowDataPacket } from "mysql2";
 
 class PostController {
   public router: Router;
@@ -22,6 +23,8 @@ class PostController {
     this.router.post("/", this.createPost);
     this.router.post("/:postId/comment", this.createComment);
     this.router.post("/child-comment", this.createchildComment);
+    this.router.get("/", this.getPosts);
+    this.router.get("/:id", this.getPost);
   }
 
   private createPost = async (
@@ -89,6 +92,28 @@ class PostController {
     } catch (error) {
       next(error);
     }
+  };
+
+  private getPosts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const searchValue = req.query.searchValue;
+      const { posts, count } = await this.postService.getPosts();
+
+      return res.status(200).json({ posts, count });
+    } catch (error) {}
+  };
+
+  private getPost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const { post } = await this.postService.getPost(id);
+
+      return res.status(200).json(post);
+    } catch (error) {}
   };
 }
 
