@@ -1,5 +1,4 @@
-import { TagDto } from "../../tags";
-import { IUser, UserDto } from "../../users/dto";
+import { UserDto } from "../../users/dto";
 
 export interface IPostsDtoProps {
   postId: string;

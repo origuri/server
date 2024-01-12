@@ -77,21 +77,35 @@ export class PostService {
     }
   }; */
   // 게시글 전체 조회
-  public getPosts = async (): Promise<{
+  public getPosts = async (
+    serachValue: string
+  ): Promise<{
     posts: PostsDto[];
     count: RowDataPacket;
   }> => {
     const db: Pool = await getConnection();
     try {
+      if (serachValue === undefined) {
+        serachValue = "";
+      }
       const posts = await db.query<RowDataPacket[]>(
-        `select p.id as postId, p.title as title, p.content as content, p.createAt as createAt, u.id as userId, u.email as email, u.name as name, u.description as description, u.password as password from post p join user u on u.id = p.userId order by createAt desc;`
+        `select p.id as postId, p.title as title, p.content as content, p.createAt as createAt,
+         u.id as userId, u.email as email, u.name as name, u.description as description, u.password as password 
+         from post p 
+         join user u on u.id = p.userId 
+         where p.title like concat('%',?,'%')
+         order by createAt desc;`,
+        [serachValue]
       );
 
       console.log("이거 확인 -> ", posts[0]);
 
       /* where title like concat('%',?,'%') */
       const count = await db.query<RowDataPacket[]>(
-        "select count(*) as count from post "
+        `select count(*) as count 
+      from post
+      where title like concat("%",?,"%")`,
+        [serachValue]
       );
       console.log("이거이거 -> ", count[0][0]);
 
@@ -117,7 +131,11 @@ export class PostService {
 
     try {
       const post = await db.query<RowDataPacket[]>(
-        `select p.id as postId, p.title as title, p.content as content, p.createAt as createAt, u.id as userId, u.email as email, u.name as name, u.description as description, u.password as password from post p join user u on u.id = p.userId where p.id = ?;`,
+        `select p.id as postId, p.title as title, p.content as content, p.createAt as createAt, 
+        u.id as userId, u.email as email, u.name as name, u.description as description, u.password as password 
+        from post p 
+        join user u on u.id = p.userId 
+        where p.id = ?;`,
         [postId]
       );
 
@@ -149,6 +167,8 @@ export class PostService {
           ),
         });
       });
+
+      console.log({ result });
 
       // 부모 댓글만 나오게 하는 필터
       const commentList = result.filter(

@@ -101,7 +101,12 @@ class PostController {
   ) => {
     try {
       const searchValue = req.query.searchValue;
-      const { posts, count } = await this.postService.getPosts();
+      const names = req.query.name;
+      console.log({ searchValue, names });
+
+      const { posts, count } = await this.postService.getPosts(
+        searchValue as string
+      );
 
       return res.status(200).json({ posts, count });
     } catch (error) {}
@@ -113,7 +118,9 @@ class PostController {
       const { post } = await this.postService.getPost(id);
 
       return res.status(200).json(post);
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 }
 
